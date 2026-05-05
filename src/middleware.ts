@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { verifyAccessJwt, isDevModeAllowingMock, AccessVerificationError } from '@/lib/auth/access';
+import { verifyAccessJwt, isDevModeAllowingMock, MOCK_IDENTITY, AccessVerificationError } from '@/lib/auth/access';
+import { writeAuditLog } from '@/lib/audit/log';
 
 const MOCK_HEADER = 'x-winnie-mock-identity';
 const VERIFIED_EMAIL_HEADER = 'x-winnie-verified-email';
@@ -14,24 +15,51 @@ export async function middleware(request: NextRequest) {
   cleanHeaders.delete(VERIFIED_EMAIL_HEADER);
   cleanHeaders.delete(VERIFIED_SUB_HEADER);
 
+  const url = new URL(request.url);
+  const ip = request.headers.get('cf-connecting-ip') ?? request.headers.get('x-forwarded-for') ?? null;
+  const userAgent = request.headers.get('user-agent') ?? null;
+
+  let identityEmail: string;
+  let identitySub: string;
+
   if (isDevModeAllowingMock()) {
     cleanHeaders.set(MOCK_HEADER, '1');
-    return NextResponse.next({ request: { headers: cleanHeaders } });
+    identityEmail = MOCK_IDENTITY.email;
+    identitySub = MOCK_IDENTITY.sub;
+  } else {
+    const token = request.headers.get('cf-access-jwt-assertion') ?? '';
+    const teamDomain = process.env.CF_ACCESS_TEAM_DOMAIN ?? '';
+    const audience = process.env.CF_ACCESS_AUD ?? '';
+
+    try {
+      const identity = await verifyAccessJwt(token, teamDomain, audience);
+      cleanHeaders.set(VERIFIED_EMAIL_HEADER, identity.email);
+      cleanHeaders.set(VERIFIED_SUB_HEADER, identity.sub);
+      identityEmail = identity.email;
+      identitySub = identity.sub;
+    } catch (err) {
+      const code = err instanceof AccessVerificationError ? err.code : 'unknown';
+      // Audit unauthorised attempts too — they're often the most
+      // interesting events in the log.
+      await writeAuditLog({
+        eventType: 'unauthorised',
+        detail: { path: url.pathname, code },
+        ip,
+        userAgent,
+      });
+      return new NextResponse(`Unauthorised: ${code}`, { status: 401 });
+    }
   }
 
-  const token = request.headers.get('cf-access-jwt-assertion') ?? '';
-  const teamDomain = process.env.CF_ACCESS_TEAM_DOMAIN ?? '';
-  const audience = process.env.CF_ACCESS_AUD ?? '';
+  await writeAuditLog({
+    eventType: 'page_view',
+    detail: { path: url.pathname, method: request.method },
+    userId: identitySub,
+    ip,
+    userAgent,
+  });
 
-  try {
-    const identity = await verifyAccessJwt(token, teamDomain, audience);
-    cleanHeaders.set(VERIFIED_EMAIL_HEADER, identity.email);
-    cleanHeaders.set(VERIFIED_SUB_HEADER, identity.sub);
-    return NextResponse.next({ request: { headers: cleanHeaders } });
-  } catch (err) {
-    const code = err instanceof AccessVerificationError ? err.code : 'unknown';
-    return new NextResponse(`Unauthorised: ${code}`, { status: 401 });
-  }
+  return NextResponse.next({ request: { headers: cleanHeaders } });
 }
 
 export const config = {
