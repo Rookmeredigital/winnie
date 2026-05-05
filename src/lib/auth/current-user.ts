@@ -1,5 +1,6 @@
 import { headers } from 'next/headers';
 import { MOCK_IDENTITY, type AccessIdentity } from '@/lib/auth/access';
+import { upsertUser } from '@/lib/db/users';
 
 export interface CurrentUser {
   id: string;
@@ -30,15 +31,25 @@ export async function getCurrentIdentity(): Promise<AccessIdentity> {
   };
 }
 
-// Returns the active user. Upserts into D1 (and updates last_seen_at)
-// once Step 6's D1 client lands. For tonight, this is identity-only —
-// the row insertion is wired in Step 6 when the typed CRUD layer exists.
 export async function getCurrentUser(): Promise<CurrentUser> {
   const identity = await getCurrentIdentity();
+  const row = await upsertUser(identity);
+
+  // Fall back to identity-only projection when D1 isn't reachable
+  // (plain next dev). The pages still need a CurrentUser to render.
+  if (!row) {
+    return {
+      id: identity.sub,
+      email: identity.email,
+      displayName: identity.name ?? identity.email.split('@')[0],
+      role: identity.email === 'aaron@rookmeredigital.com' ? 'owner' : 'viewer',
+    };
+  }
+
   return {
-    id: identity.sub,
-    email: identity.email,
-    displayName: identity.name ?? identity.email.split('@')[0],
-    role: identity.email === 'aaron@rookmeredigital.com' ? 'owner' : 'viewer',
+    id: row.id,
+    email: row.email,
+    displayName: row.display_name,
+    role: row.role,
   };
 }
