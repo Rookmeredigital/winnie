@@ -1,0 +1,26 @@
+# Secrets — never commit
+docs/cloudflare-tokens.txt
+docs/Gateway*
+docs/*token*
+docs/*Token*
+docs/*secret*
+docs/*Secret*
+docs/*credential*
+docs/*Credential*
+.env
+.env.local
+.env.*
+
+# Build artifacts
+node_modules/
+.next/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
