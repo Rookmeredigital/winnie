@@ -506,6 +506,7 @@ These will come later, in their own specs:
 | 2026-05-04 | PendingAction queue, not autonomous execution     | Safety + auditability                            |
 | 2026-05-04 | No replication of other apps' data into Winnie    | GDPR + sync hell                                 |
 | 2026-05-04 | All AI through Cloudflare AI Gateway              | Cost cap + logging                               |
+| 2026-05-05 | OpenNext for Cloudflare (`@opennextjs/cloudflare`) instead of `@cloudflare/next-on-pages` | next-on-pages frozen at Next ≤ 15.5.2; OpenNext is Cloudflare's currently-recommended adapter and supports our Next 15.5.15. Same Pages + D1 + R2 deploy targets — only the build adapter changes. |
 
 ---
 
