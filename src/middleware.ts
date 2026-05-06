@@ -54,7 +54,10 @@ export async function middleware(request: NextRequest) {
   await writeAuditLog({
     eventType: 'page_view',
     detail: { path: url.pathname, method: request.method },
-    userId: identitySub,
+    // In the mock window, identitySub is 'mock-aaron' which has no
+    // users row — would FK-fail. Real-mode identitySub is the verified
+    // JWT sub, populated in users by getCurrentUser() on first page load.
+    userId: isDevModeAllowingMock() ? null : identitySub,
     ip,
     userAgent,
   });
