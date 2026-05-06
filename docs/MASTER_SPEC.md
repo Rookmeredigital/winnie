@@ -507,6 +507,7 @@ These will come later, in their own specs:
 | 2026-05-04 | No replication of other apps' data into Winnie    | GDPR + sync hell                                 |
 | 2026-05-04 | All AI through Cloudflare AI Gateway              | Cost cap + logging                               |
 | 2026-05-05 | OpenNext for Cloudflare (`@opennextjs/cloudflare`) instead of `@cloudflare/next-on-pages` | next-on-pages frozen at Next ≤ 15.5.2; OpenNext is Cloudflare's currently-recommended adapter and supports our Next 15.5.15. Same Pages + D1 + R2 deploy targets — only the build adapter changes. |
+| 2026-05-05 | Deploy to **Cloudflare Workers + Static Assets**, not legacy Cloudflare Pages | Follows from the OpenNext decision — its deploy target is Workers + Assets, Cloudflare's unified successor to Pages for Next.js apps. Same edge, same D1, same Access, same R2; only the dashboard surface changes (Workers & Pages → Workers). URL is `*.workers.dev` rather than `*.pages.dev` until DNS is wired. |
 
 ---
 

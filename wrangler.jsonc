@@ -1,8 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "winnie",
+  "main": ".open-next/worker.js",
   "compatibility_date": "2026-05-01",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
 
   // D1 — Winnie's own data (users, connectors, pending_actions,
   // audit_log, ai_calls). Code reads `env.DB`.
@@ -15,12 +21,17 @@
     }
   ],
 
-  // Build/deploy entry and asset wiring are added at Step 8 once
-  // OpenNext for Cloudflare is configured.
+  // Top-level vars apply unless an env override exists. WINNIE_ALLOW_NO_ACCESS=1
+  // covers the brief window between first deploy and the OTP Access policy
+  // being attached. Flipped to "0" once Access is gating the URL (sub-step E).
   "vars": {
-    // Filled at Step 8 with real values per environment.
-    "CF_ACCESS_TEAM_DOMAIN": "",
+    "CF_ACCESS_TEAM_DOMAIN": "rookmere",
     "CF_ACCESS_AUD": "",
-    "AI_GATEWAY_URL": ""
+    "AI_GATEWAY_URL": "",
+    "WINNIE_ALLOW_NO_ACCESS": "1"
+  },
+
+  "observability": {
+    "enabled": true
   }
 }
