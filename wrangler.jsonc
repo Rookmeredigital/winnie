@@ -10,6 +10,15 @@
     "binding": "ASSETS"
   },
 
+  // Custom Domain was attached via the Cloudflare dashboard on
+  // 2026-05-07. Mirrored here so future `wrangler deploy` runs preserve
+  // the mapping rather than relying on dashboard-only state. Cloudflare
+  // manages the DNS records and the edge cert; we only declare the
+  // binding. The *.workers.dev URL keeps working alongside this.
+  "routes": [
+    { "pattern": "winnie.rookmeredigital.com", "custom_domain": true }
+  ],
+
   // D1 — Winnie's own data (users, connectors, pending_actions,
   // audit_log, ai_calls). Code reads `env.DB`.
   "d1_databases": [
