@@ -31,13 +31,13 @@
   ],
 
   // Top-level vars apply unless an env override exists. WINNIE_ALLOW_NO_ACCESS=1
-  // covers the brief window between first deploy and the OTP Access policy
-  // being attached. Flipped to "0" once Access is gating the URL (sub-step E).
+  // covered the brief window between first deploy and the Entra/Access policy
+  // being attached. Flipped to "0" on Day 3 (2026-05-12) once Access was live.
   "vars": {
     "CF_ACCESS_TEAM_DOMAIN": "rookmere",
-    "CF_ACCESS_AUD": "",
+    "CF_ACCESS_AUD": "9f08001e3e2e44b6e5b6f7d1d04b63942e50bea4db9baf3032c0507456be84d2",
     "AI_GATEWAY_URL": "",
-    "WINNIE_ALLOW_NO_ACCESS": "1"
+    "WINNIE_ALLOW_NO_ACCESS": "0"
   },
 
   "observability": {

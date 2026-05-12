@@ -95,5 +95,5 @@ export function isDevModeAllowingMock(): boolean {
   // the Access policy is attached. WINNIE_ALLOW_NO_ACCESS=1 lets
   // the middleware accept the mock identity in that window. MUST be
   // unset (or 0) once Access is in front in production.
-  return process.env.WINNIE_ALLOW_NO_ACCESS === '1';
+  return String(process.env.WINNIE_ALLOW_NO_ACCESS) === '1';
 }
